@@ -106,6 +106,7 @@
 <div id="result-wrapper">      
     <div id="result">
                 <div class="loader">
+                </div>
                         <div class = "whitespace" id="status"></div>
 
                         </div>
@@ -123,9 +124,14 @@
                 
                 </div>
                 <div id="stacktrace" class = "whitespace"></div>
-            </div>
- </div>            
-        <div class="modal"></div>
+      </div>  
+   </div>
+       
+        <div id="stacktrace-wrapper">
+                <div id="stacktrace" class = "whitespace"></div>
+                <div id="errordescription" class="whitespace"></div>
+        </div>
+        <div class="modal"><!-- Place at bottom of page --></div>
 
 <!-- The Modal -->
 <div id="myModal" class="modalpopup">
@@ -171,7 +177,7 @@
             
             $("#opponentsResult").hide();
             $("#result").hide();
-            $("#stacktrace").hide();
+            $("#stacktrace-wrapper").hide();
             $("#cancelMatch").hide();
             $('.loader').hide();
             var data = {
@@ -285,6 +291,12 @@
                 });
 
                 socket.on('challengeCancelled', function(response){
+                        if(confirm('Do you want to keep your friends code?')){
+
+                        }else{
+                            editor2.setValue('');
+                        }
+                        console.log('cancel event received');
                         $("#clockdiv").hide();
                         $("#cancelMatch").hide();
                         var filterVal = 'blur(0px)';
@@ -368,10 +380,28 @@
                     socket.emit('challengeRejected',{opponentSocketID:socket.id});
         } 
         function challengeAccepted(){
+                        console.log('length my code'+editor.getValue().length);
+                        if(editor.getValue().length != 0){
+                            if(confirm('Do you want to keep your current code?')){
+
+                            }else{
+                                editor.setValue('');
+                            }
+                        }
                         socket.emit('challengeAccepted',{opponentSocketID:socket.id});
         }
 
         function cancelChallenge(){
+                console.log('length friend code'+editor2.getValue().length);
+                    if(editor2.getValue().length != 0){
+
+                   
+                        if(confirm('Do you want to keep your friends code?')){
+
+                        }else{
+                            editor2.setValue('');
+                        }
+                    }
                         $("#clockdiv").hide();
                         $("#cancelMatch").hide();
                         var filterVal = 'blur(0px)';
@@ -382,7 +412,7 @@
                         .css('oFilter',filterVal)
                         .css('msFilter',filterVal);
                         $('#clockdiv').attr('data-inMatch', 'false');
-                        socket.emit('cancleChallenge',{mySocketID:socket.id});
+                        socket.emit('cancelChallenge',{mySocketID:socket.id});
         }
 
        function compile(){
@@ -412,8 +442,16 @@
         function getCompileData(data)  {
             $('.loader').hide();
             console.log(data)
-            $('#status').text(data.compileData.status);
-            $('#youroutput').text(data.compileData.result);
+            if(data.compileData.statusid == '1'){
+                $('#status').text(data.compileData.status);
+                $('#youroutput').text(data.compileData.result);
+            }else{
+                $('#result-wrapper').hide();
+                $('#stacktrace-wrapper').show();
+                $('#stacktrace').text(data.compileData.stderr);
+                $('#errorDescription').text(data.compileData.stderr);
+            }
+            
         }
 
         function submit(){
